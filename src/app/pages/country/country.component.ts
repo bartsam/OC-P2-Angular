@@ -1,67 +1,87 @@
-import {HttpClient, HttpErrorResponse} from '@angular/common/http';
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, ParamMap, Router} from '@angular/router';
-import Chart from 'chart.js/auto';
-
+import { Component, inject, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { ChartConfiguration } from 'chart.js';
+import { Kpi } from 'src/app/models/Kpi';
+import { Participation } from 'src/app/models/Participation';
+import { DataService } from 'src/app/services/data.service';
 
 @Component({
   selector: 'app-country',
   templateUrl: './country.component.html',
-  styleUrls: ['./country.component.scss']
+  styleUrls: ['./country.component.scss'],
 })
 export class CountryComponent implements OnInit {
-  private olympicUrl = './assets/mock/olympic.json';
-  public lineChart!: Chart<"line", string[], number>;
-  public titlePage: string = '';
-  public totalEntries: any = 0;
-  public totalMedals: number = 0;
-  public totalAthletes: number = 0;
+  public titlePage = '';
+  public kpis: Kpi[] = [];
+  public chartConfig!: ChartConfiguration;
   public error!: string;
 
-  constructor(private route: ActivatedRoute, private router: Router, private http: HttpClient) {
-  }
+  private route = inject(ActivatedRoute);
+  private dataService = inject(DataService);
 
   ngOnInit() {
-    let countryName: string | null = null
-    this.route.paramMap.subscribe((param: ParamMap) => countryName = param.get('countryName'));
-    this.http.get<any[]>(this.olympicUrl).pipe().subscribe(
-      (data) => {
-        if (data && data.length > 0) {
-          const selectedCountry = data.find((i: any) => i.country === countryName);
-          this.titlePage = selectedCountry.country;
-          const participations = selectedCountry?.participations.map((i: any) => i);
-          this.totalEntries = participations?.length ?? 0;
-          const years = selectedCountry?.participations.map((i: any) => i.year) ?? [];
-          const medals = selectedCountry?.participations.map((i: any) => i.medalsCount.toString()) ?? [];
-          this.totalMedals = medals.reduce((accumulator: any, item: any) => accumulator + parseInt(item), 0);
-          const nbAthletes = selectedCountry?.participations.map((i: any) => i.athleteCount.toString()) ?? []
-          this.totalAthletes = nbAthletes.reduce((accumulator: any, item: any) => accumulator + parseInt(item), 0);
-          this.buildChart(years, medals);
-        }
+    const countryName = this.route.snapshot.paramMap.get('countryName');
+    if (!countryName) return;
+
+    this.dataService.getOlympicByCountryName(countryName).subscribe({
+      next: (country) => {
+        if (!country) return;
+        this.titlePage = country.country;
+        this.handleParticipations(country.participations);
       },
-      (error: HttpErrorResponse) => {
-        this.error = error.message
-      }
-    );
+      error: (error) => (this.error = error.message),
+    });
   }
 
-  buildChart(years: number[], medals: string[]) {
-    const lineChart = new Chart("countryChart", {
+  private handleParticipations(participations: Participation[]) {
+    const totalEntries = participations.length;
+    const totalMedals = participations.reduce(
+      (acc: number, p: Participation) => acc + p.medalsCount,
+      0,
+    );
+    const totalAthletes = participations.reduce(
+      (acc: number, p: Participation) => acc + p.athleteCount,
+      0,
+    );
+
+    this.kpis = [
+      { label: 'Number of entries', value: totalEntries },
+      { label: 'Total Number of medals', value: totalMedals },
+      { label: 'Total Number of athletes', value: totalAthletes },
+    ];
+
+    const chartLabels = participations.map((p) => p.year.toString());
+    const chartData = participations.map((p) => p.medalsCount);
+
+    this.chartConfig = {
       type: 'line',
       data: {
-        labels: years,
+        labels: chartLabels,
         datasets: [
           {
-            label: "medals",
-            data: medals,
-            backgroundColor: '#0b868f'
+            label: 'Medals',
+            data: chartData,
+            backgroundColor: '#0b868f',
           },
-        ]
+        ],
       },
       options: {
-        aspectRatio: 2.5
-      }
-    });
-    this.lineChart = lineChart;
+        aspectRatio: 2.5,
+        scales: {
+          y: {
+            title: {
+              display: true,
+              text: 'Medals',
+            },
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Dates',
+            },
+          },
+        },
+      },
+    };
   }
 }

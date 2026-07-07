@@ -9,9 +9,9 @@
   - Composant Chart avec gestion de deux type (interface ChartType) et buildPieChart & buildChart a déplacer dans un service dédié aux Charts
   - Composant ".split" pour afficher les statistiques par page (dans header ?)
 - Code obsolète :
-  - Remplacer NgModule par les imports dans le décorateur @Component
-  - Importer RouterOutlet plutot que NgModule dans app.component.ts
-  - Observable `subscribe` dépriécié à revoir avec Observer Pattern
+  - Remplacer NgModule par les imports dans le décorateur @Component ?
+  - Importer RouterOutlet plutot que NgModule dans app.component.ts ?
+  - Remplacement de la syntaxe dépréciée du subscribe par l'objet Observer actuel
 - Appels HTTP dans les composants à revoir dans un service pour exposer les data (/assets/mock) : home.component.ts et country.component.ts (anti-pattern)
 - Absence de typage strict :
   - Créer un répertoire /models pour typer les country et les stats par page
@@ -23,6 +23,7 @@
 - Autres :
   - Initialisation des attributs et manipulation des données directement dans les composants (anti-pattern)
   - Remplacer la navigation du chart par navigateByUrl
+  - Certaine initialisation d'attribut sur la home et country pourrait être simplifié
   - NotFoundComponent pourrait avoir l'attribut Router dans le constructor
   - Pas de gestion d'erreur en cas de donnée manquante par page
   - Pas de gestion d'erreur en cas de mauvais param countryName ou redirection vers not-found
@@ -55,11 +56,12 @@ type Chart = {
 ```
 ### Avantages
 
-- Éviter la duplication de la requête vers `olympicUrl`
+- Éviter la duplication de la requête vers `olympicUrl` : réduction des appels réseau en stockant les résultats dans un `BehaviorSubject` pour éviter les requêtes inutile si les données sont déjà présentes en mémoire.
 - Permettra de remplacer l'url de l'API facilement dans le service data.service.ts
+- Les composants consomment uniquement les données fournis par le service sans accès à l'API.
 - Avoir un code maintenable avec des services dédiés à chaque logique (chart & header)
 - Avoir des fichicers lisible moins long
-- Éviter la duplication d'UI avec des composants par fonctionnalités
+- Éviter la duplication des composants par fonctionnalités
 
 ### Arborescence
 
@@ -83,10 +85,10 @@ src/app/
 │ │ ├── chart.component.spec.ts
 │ │ └── chart.component.ts
 ├── models/
-│ ├── country.model.ts
-│ ├── stats.model.ts
-│ ├── chart.model.ts
-│ └── chart.type.ts
+│ ├── Olympic.ts
+│ ├── Kpi.ts
+│ ├── Participation.ts
+│ └── Chart.ts
 ├── pages/
 │ ├── country
 │ │ ├── country.component.html
@@ -105,7 +107,7 @@ src/app/
 │   └── not-found.component.ts
 └── services
   ├── data.service.ts // Singleton pattern
-  ├── stats.service.ts // Adapter pattern
+  ├── kpis.service.ts // Adapter pattern
   └── charts.service.ts // Adapter pattern
 ```
 

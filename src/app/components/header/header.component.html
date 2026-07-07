@@ -1,0 +1,12 @@
+<h1>Olympic games app</h1>
+<hr />
+<header>
+  <div class="center">
+    <h2>{{ title }}</h2>
+  </div>
+  <div class="kpis">
+    @for (kpi of kpis; track kpi.value) {
+      <app-card [label]="kpi.label" [value]="kpi.value" />
+    }
+  </div>
+</header>
