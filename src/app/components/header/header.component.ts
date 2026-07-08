@@ -9,4 +9,5 @@ import { Kpi } from 'src/app/models/Kpi';
 export class HeaderComponent {
   @Input() title: string | null = '';
   @Input() kpis: Kpi[] | null = [];
+  @Input() backLink: string | undefined;
 }

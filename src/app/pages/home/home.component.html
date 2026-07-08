@@ -1,4 +1,9 @@
 <div class="page">
-  <app-header [title]="titlePage" [kpis]="kpis" />
-  <app-chart [config]="chartConfig" />
+  <app-header [title]="titlePage" [kpis]="kpis$ | async" />
+  @if (error) {
+    <div class="center">
+      <p class="error">{{ error }}</p>
+    </div>
+  }
+  <app-chart [config]="chart$ | async" />
 </div>

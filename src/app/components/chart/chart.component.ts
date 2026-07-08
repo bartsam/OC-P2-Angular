@@ -16,7 +16,8 @@ import { Chart, ChartConfiguration } from 'chart.js/auto';
   styleUrl: './chart.component.scss',
 })
 export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
-  @Input({ required: true }) config!: ChartConfiguration;
+  @Input() config: ChartConfiguration | null = null;
+
   // 1. Accès à l'élément #chartCanvas du template
   @ViewChild('chartCanvas') canvasRef!: ElementRef<HTMLCanvasElement>;
 
@@ -38,7 +39,7 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   private buildChart() {
-    if (!this.canvasRef?.nativeElement) return;
+    if (!this.canvasRef?.nativeElement || !this.config) return;
     this.chart?.destroy(); // Nettoie l'ancien avant de créer le nouveau
     this.chart = new Chart(this.canvasRef.nativeElement, this.config);
   }

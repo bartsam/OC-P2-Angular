@@ -1,7 +1,13 @@
 <div class="page">
-  <app-header [title]="titlePage" [kpis]="kpis" />
-  <app-chart [config]="chartConfig" />
-  <div class="center">
-    <a routerLink="">Go back</a>
-  </div>
+  <app-header
+    [title]="titlePage$ | async"
+    [kpis]="kpis$ | async"
+    backLink="/"
+  />
+  @if (error) {
+    <div class="center">
+      <p class="error">{{ error }}</p>
+    </div>
+  }
+  <app-chart [config]="chart$ | async" />
 </div>

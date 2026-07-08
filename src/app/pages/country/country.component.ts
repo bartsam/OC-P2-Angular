@@ -1,8 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ChartConfiguration } from 'chart.js';
+import { catchError, filter, Observable, of, tap } from 'rxjs';
 import { Kpi } from 'src/app/models/Kpi';
-import { Participation } from 'src/app/models/Participation';
+import { Olympic } from 'src/app/models/Olympic';
 import { DataService } from 'src/app/services/data.service';
 
 @Component({
@@ -11,77 +12,53 @@ import { DataService } from 'src/app/services/data.service';
   styleUrls: ['./country.component.scss'],
 })
 export class CountryComponent implements OnInit {
-  public titlePage = '';
-  public kpis: Kpi[] = [];
-  public chartConfig!: ChartConfiguration;
+  public titlePage$!: Observable<string>;
+  public kpis$!: Observable<Kpi[]>;
+  public chart$!: Observable<ChartConfiguration | null>;
   public error!: string;
 
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private dataService = inject(DataService);
 
   ngOnInit() {
-    const countryName = this.route.snapshot.paramMap.get('countryName');
-    if (!countryName) return;
+    const id = this.route.snapshot.paramMap.get('id');
+    const countryId = Number(id);
 
-    this.dataService.getOlympicByCountryName(countryName).subscribe({
-      next: (country) => {
-        if (!country) return;
-        this.titlePage = country.country;
-        this.handleParticipations(country.participations);
-      },
-      error: (error) => (this.error = error.message),
-    });
-  }
+    if (!id || isNaN(countryId)) {
+      this.router.navigate(['/not-found']);
+      return;
+    }
 
-  private handleParticipations(participations: Participation[]) {
-    const totalEntries = participations.length;
-    const totalMedals = participations.reduce(
-      (acc: number, p: Participation) => acc + p.medalsCount,
-      0,
-    );
-    const totalAthletes = participations.reduce(
-      (acc: number, p: Participation) => acc + p.athleteCount,
-      0,
-    );
+    this.dataService
+      .getOlympicById(countryId)
+      .pipe(
+        // Check the result of getOlympicById and redirect if country is undefined
+        tap((country: Olympic | undefined) => {
+          if (!country) {
+            this.router.navigate(['/not-found']);
+          }
+        }),
+        // Stop pipe if country is undefined
+        filter((country: Olympic | undefined): country is Olympic => !!country),
+      )
+      .subscribe((country) => {
+        // Assign Observable<string> to titlePage$ with of()
+        this.titlePage$ = of(country.country);
 
-    this.kpis = [
-      { label: 'Number of entries', value: totalEntries },
-      { label: 'Total Number of medals', value: totalMedals },
-      { label: 'Total Number of athletes', value: totalAthletes },
-    ];
+        this.kpis$ = this.dataService.getCountryKPIs(countryId).pipe(
+          catchError((error: Error) => {
+            this.error = error.message;
+            return of([]);
+          }),
+        );
 
-    const chartLabels = participations.map((p) => p.year.toString());
-    const chartData = participations.map((p) => p.medalsCount);
-
-    this.chartConfig = {
-      type: 'line',
-      data: {
-        labels: chartLabels,
-        datasets: [
-          {
-            label: 'Medals',
-            data: chartData,
-            backgroundColor: '#0b868f',
-          },
-        ],
-      },
-      options: {
-        aspectRatio: 2.5,
-        scales: {
-          y: {
-            title: {
-              display: true,
-              text: 'Medals',
-            },
-          },
-          x: {
-            title: {
-              display: true,
-              text: 'Dates',
-            },
-          },
-        },
-      },
-    };
+        this.chart$ = this.dataService.getCountryChart(countryId).pipe(
+          catchError((error: Error) => {
+            this.error = error.message;
+            return of(null);
+          }),
+        );
+      });
   }
 }
