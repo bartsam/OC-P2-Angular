@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Kpi } from 'src/app/models/Kpi';
+import { Kpi } from 'src/app/models/olympic.model';
 
 @Component({
   selector: 'app-header',
@@ -7,7 +7,7 @@ import { Kpi } from 'src/app/models/Kpi';
   styleUrl: './header.component.scss',
 })
 export class HeaderComponent {
-  @Input() title: string | null = '';
-  @Input() kpis: Kpi[] | null = [];
-  @Input() backLink: string | undefined;
+  @Input() title?: string | null;
+  @Input() kpis?: Kpi[] | null;
+  @Input() backLink?: string;
 }

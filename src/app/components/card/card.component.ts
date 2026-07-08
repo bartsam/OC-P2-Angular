@@ -6,6 +6,6 @@ import { Component, Input } from '@angular/core';
   styleUrl: './card.component.scss',
 })
 export class CardComponent {
-  @Input() label: string | null = '';
-  @Input() value: string | number | null = '';
+  @Input() label?: string;
+  @Input() value?: string | number;
 }

@@ -1,9 +1,15 @@
 <div class="page">
   <app-header [title]="titlePage" [kpis]="kpis$ | async" />
-  @if (error) {
-    <div class="center">
-      <p class="error">{{ error }}</p>
-    </div>
+
+  @if (loading) {
+    <app-loading />
+  } @else if (error) {
+    <app-error [message]="error" />
+  } @else {
+    @if (chart$ | async; as chart) {
+      <app-chart [config]="chart" />
+    } @else {
+      <app-empty />
+    }
   }
-  <app-chart [config]="chart$ | async" />
 </div>

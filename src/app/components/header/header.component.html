@@ -1,9 +1,16 @@
-<h1>Olympic games app</h1>
-<hr />
 <header>
+  <h1>
+    <a
+      routerLink=""
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      >Olympic Games</a
+    >
+  </h1>
+  <hr />
   <div class="center">
     @if (backLink) {
-      <a [routerLink]="backLink">Go back</a>
+      <app-back-button [link]="backLink" />
     }
     @if (title) {
       <h2>{{ title }}</h2>

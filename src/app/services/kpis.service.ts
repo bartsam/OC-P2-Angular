@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Kpi } from '../models/Kpi';
-import { Olympic } from '../models/Olympic';
+import { Kpi, Olympic } from '../models/olympic.model';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +10,9 @@ export class KpisService {
    * @param {Olympic[]} olympics - An array of Olympic objects
    * @returns {Kpi[]} An array of KPIs.
    */
-  getOlympicsKPIs(olympics: Olympic[]): Kpi[] {
+  getOlympicsKPIs(olympics: Olympic[]): Kpi[] | null {
+    if (!olympics || olympics.length === 0) return null;
+
     const totalCountries = olympics.map(
       (olympic: Olympic) => olympic.country,
     ).length;
@@ -31,7 +32,9 @@ export class KpisService {
    * @param {Olympic} country - An Olympic object
    * @returns {Kpi[]} An array of KPIs.
    */
-  getCountryKPIs(country: Olympic): Kpi[] {
+  getCountryKPIs(country: Olympic): Kpi[] | null {
+    if (!country) return null;
+
     const totalEntries = country.participations.length;
     const totalMedals = country.participations.reduce(
       (acc, p) => acc + p.medalsCount,

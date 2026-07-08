@@ -1,18 +1,19 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { ChartConfiguration } from 'chart.js';
-import { catchError, map, Observable, shareReplay, throwError } from 'rxjs';
-import { Kpi } from '../models/Kpi';
-import { Olympic } from '../models/Olympic';
-import { ChartService } from './chart.service';
-import { KpisService } from './kpis.service';
+import { Injectable, inject } from '@angular/core';
+import {
+  Observable,
+  catchError,
+  delay,
+  map,
+  shareReplay,
+  throwError,
+} from 'rxjs';
+import { Olympic } from '../models/olympic.model';
 
 @Injectable({ providedIn: 'root' })
 export class DataService {
   private olympicUrl = './assets/mock/olympic.json';
   private http = inject(HttpClient);
-  private kpisService = inject(KpisService);
-  private chartService = inject(ChartService);
 
   private olympics$: Observable<Olympic[]> | null = null;
 
@@ -23,6 +24,11 @@ export class DataService {
   getOlympics(): Observable<Olympic[]> {
     if (!this.olympics$) {
       this.olympics$ = this.http.get<Olympic[]>(this.olympicUrl).pipe(
+        delay(500),
+        map((olympics: Olympic[]) =>
+          [...olympics].sort((a, b) => a.country.localeCompare(b.country)),
+        ),
+        // Observable en "multicast" avec cache : la 1ère souscription déclenche l'appel HTTP, toutes suivantes réutilisent la même requête.
         shareReplay(1),
         catchError((error: HttpErrorResponse) => {
           this.olympics$ = null;
@@ -42,56 +48,6 @@ export class DataService {
     return this.getOlympics().pipe(
       map((countries: Olympic[]) =>
         countries.find((c: Olympic) => c.id === countryId),
-      ),
-    );
-  }
-
-  /**
-   * Get an observable that emits the KPIs of all countries
-   * @returns {Observable<Kpi[]>} An observable of an array of KPIs
-   */
-  getOlympicsKPIs(): Observable<Kpi[]> {
-    return this.getOlympics().pipe(
-      map((olympics) => this.kpisService.getOlympicsKPIs(olympics)),
-    );
-  }
-
-  /**
-   * Get an observable that emits the KPIs of a country
-   * @returns {Observable<Kpi[]>} An observable of an array of KPIs
-   */
-  getCountryKPIs(countryId: number): Observable<Kpi[]> {
-    return this.getOlympicById(countryId).pipe(
-      map((country: Olympic | undefined) =>
-        country ? this.kpisService.getCountryKPIs(country) : [],
-      ),
-    );
-  }
-
-  /**
-   * Get an observable that emits the pie chart config of all countries
-   * @param {(countryId: number) => void} [onCountryClick] - Callback invoked with the clicked country's name
-   * @returns {Observable<ChartConfiguration | null>} An observable of a chart config
-   */
-  getOlympicsChart(
-    onCountryClick?: (countryId: number) => void,
-  ): Observable<ChartConfiguration | null> {
-    return this.getOlympics().pipe(
-      map((olympics) =>
-        this.chartService.getOlympicsChart(olympics, onCountryClick),
-      ),
-    );
-  }
-
-  /**
-   * Get an observable that emits the line chart config of a country
-   * @param {number} countryId - Id of the country
-   * @returns {Observable<ChartConfiguration | null>} An observable of a Chart config
-   */
-  getCountryChart(countryId: number): Observable<ChartConfiguration | null> {
-    return this.getOlympicById(countryId).pipe(
-      map((country: Olympic | undefined) =>
-        country ? this.chartService.getCountryChart(country) : null,
       ),
     );
   }

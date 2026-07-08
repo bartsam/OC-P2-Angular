@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActiveElement, ChartConfiguration, ChartEvent } from 'chart.js';
-import { Olympic } from '../models/Olympic';
-import { Participation } from '../models/Participation';
+import { Olympic, Participation } from '../models/olympic.model';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +15,9 @@ export class ChartService {
   getOlympicsChart(
     olympics: Olympic[],
     onCountryClick?: (countryId: number) => void,
-  ): ChartConfiguration {
+  ): ChartConfiguration | null {
+    if (!olympics || olympics.length === 0) return null;
+
     const ids = olympics.map((c: Olympic) => c.id);
     const labels = olympics.map((c: Olympic) => c.country);
     const data = olympics.map((c: Olympic) =>
@@ -60,7 +61,9 @@ export class ChartService {
    * @param {Olympic} country - An Olympic object
    * @returns {ChartConfiguration} A configuration of Chart.js
    */
-  getCountryChart(country: Olympic): ChartConfiguration {
+  getCountryChart(country: Olympic): ChartConfiguration | null {
+    if (!country) return null;
+
     const labels = country.participations.map((p) => p.year.toString());
     const data = country.participations.map((p) => p.medalsCount);
 
