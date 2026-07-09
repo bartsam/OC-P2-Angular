@@ -11,7 +11,7 @@ import { ChartService } from '@services/chart.service';
 import { DataService } from '@services/data.service';
 import { KpisService } from '@services/kpis.service';
 import { ChartConfiguration } from 'chart.js';
-import { catchError, finalize, Observable, of } from 'rxjs';
+import { catchError, finalize, map, Observable, of, shareReplay } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -43,20 +43,24 @@ export class HomeComponent implements OnInit {
     const onCountryClick = (countryId: number) =>
       this.router.navigateByUrl(`country/${countryId}`);
 
-    this.dataService
-      .getOlympics()
-      .pipe(
-        catchError((error: Error) => {
-          this.error = error.message;
-          return of([]);
-        }),
-        finalize(() => (this.loading = false)),
-      )
-      .subscribe((olympics: Olympic[]) => {
-        this.kpis$ = of(this.kpisService.getOlympicsKPIs(olympics));
-        this.chart$ = of(
-          this.chartService.getOlympicsChart(olympics, onCountryClick),
-        );
-      });
+    const olympics$ = this.dataService.getOlympics().pipe(
+      catchError((error: Error) => {
+        this.error = error.message;
+        return of([]);
+      }),
+      finalize(() => (this.loading = false)),
+      // Avoid duplicating catchError/finalize for each subscriber
+      shareReplay(1),
+    );
+
+    this.kpis$ = olympics$.pipe(
+      map((olympics: Olympic[]) => this.kpisService.getOlympicsKPIs(olympics)),
+    );
+
+    this.chart$ = olympics$.pipe(
+      map((olympics: Olympic[]) =>
+        this.chartService.getOlympicsChart(olympics, onCountryClick),
+      ),
+    );
   }
 }

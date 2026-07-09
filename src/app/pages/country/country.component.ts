@@ -11,7 +11,16 @@ import { ChartService } from '@services/chart.service';
 import { DataService } from '@services/data.service';
 import { KpisService } from '@services/kpis.service';
 import { ChartConfiguration } from 'chart.js';
-import { catchError, filter, finalize, Observable, of, tap } from 'rxjs';
+import {
+  catchError,
+  filter,
+  finalize,
+  map,
+  Observable,
+  of,
+  shareReplay,
+  tap,
+} from 'rxjs';
 
 @Component({
   selector: 'app-country',
@@ -48,33 +57,34 @@ export class CountryComponent implements OnInit {
       this.router.navigate(['/not-found']);
       return;
     }
+    const country$ = this.dataService.getOlympicById(countryId).pipe(
+      catchError((error: Error) => {
+        this.error = error.message;
+        return of(undefined);
+      }),
+      // Check the result of getOlympicById and redirect if country is undefined
+      tap((country: Olympic | undefined) => {
+        if (!country) this.router.navigate(['/not-found']);
+      }),
+      // Stop pipe if country is undefined
+      filter((country: Olympic | undefined): country is Olympic => !!country),
+      finalize(() => {
+        this.loading = false;
+      }),
+      // Avoid duplicating catchError/tap/finalize for each subscriber
+      shareReplay(1),
+    );
 
-    this.dataService
-      .getOlympicById(countryId)
-      .pipe(
-        // Catch HTTP errors and treat them as "country not found" to unify error handling
-        catchError((error: Error) => {
-          this.error = error.message;
-          return of(undefined);
-        }),
-        // Check the result of getOlympicById and redirect if country is undefined
-        tap((country: Olympic | undefined) => {
-          if (!country) this.router.navigate(['/not-found']);
-        }),
-        // Stop pipe if country is undefined
-        filter((country: Olympic | undefined): country is Olympic => !!country),
-        // Stop loading once the pipe completes or errors
-        finalize(() => (this.loading = false)),
-      )
-      .subscribe((country) => {
-        // Wrap synchronous values in of() to match types Observable
-        this.titlePage$ = of(country.country);
-        this.kpis$ = of(this.kpisService.getCountryKPIs(country));
-        this.chart$ = of(
-          country.participations.length > 0
-            ? this.chartService.getCountryChart(country)
-            : null,
-        );
-      });
+    this.titlePage$ = country$.pipe(map((country: Olympic) => country.country));
+    this.kpis$ = country$.pipe(
+      map((country: Olympic) => this.kpisService.getCountryKPIs(country)),
+    );
+    this.chart$ = country$.pipe(
+      map((country: Olympic) =>
+        country.participations.length > 0
+          ? this.chartService.getCountryChart(country)
+          : null,
+      ),
+    );
   }
 }

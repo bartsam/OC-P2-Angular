@@ -2,28 +2,27 @@
 
 ## Analyse
 
-- Fichiers trop volumineux : home.component.ts et country.component.ts
+- Fichiers trop volumineux : `home.component.ts` et `country.component.ts`
 - Code dupliqué :
-  - Requêtes de './assets/mock/olympic.json'
-  - Header des pages (avec attribut title)
-  - Composant Chart avec gestion de deux type (interface ChartType) et buildPieChart & buildChart a déplacer dans un service dédié aux Charts
-  - Composant ".split" pour afficher les statistiques par page (dans header ?)
+  - Requêtes HTTP vers `./assets/mock/olympic.json` depuis `home.component.ts` et `country.component.ts` (anti-pattern) à revoir dans un service pour exposer les data
+  - Header des pages avec attribut title et "split" elements pour afficher les statistiques
+  - Canvas et génération des charts avec `buildPieChart` & `buildChart` a déplacer dans un composant et service dédié
 - Code obsolète :
-  - Remplacer NgModule par les imports dans le décorateur @Component ?
-  - Importer RouterOutlet plutot que NgModule dans app.component.ts ?
-  - Remplacement de la syntaxe dépréciée du subscribe par l'objet Observer actuel
-- Appels HTTP dans les composants à revoir dans un service pour exposer les data (/assets/mock) : home.component.ts et country.component.ts (anti-pattern)
+  - Gestion des composants avec `NgModule` à remplacer par standalone components (imports dans le _Decorateur Pattern_ @Component)
+  - Gestion du routing avec `NgModule` à remplacer par `provideRouter` dans la config
 - Absence de typage strict :
-  - Créer un répertoire /models pour typer les country et les stats par page
-  - Revoir l'initialisation des attributs dans ngOnInit
+  - Créer un répertoire `/models` pour typer les country et les stats par page
+  - Revoir l'initialisation des propriétés avec des types dans les composants pages
+  - Remplacer les `any` par les interfaces des models
 - Code à supprimer :
   - console.log(`Liste des données : ${JSON.stringify(data)}`); sur home.component.ts
-- Mauvaise gestion des observables : `subscribe` dépriécié à revoir avec Observer Pattern et rxjs ?
+  - Certain calcul de propriété statistique pourrait être simplifié
+- Mauvaise gestion des observables :
+  - Syntaxe dépréciée du `subscribe` à remplacer par un Observer { next, error } sur les requêtes
+  - `pipe()` sur les requête HTTP ne sont pas utilisés
+  - Manipulation des données directement dans les composants pages (anti-pattern)
 - Autres :
-  - Initialisation des attributs et manipulation des données directement dans les composants (anti-pattern)
-  - Remplacer la navigation du chart par navigateByUrl
-  - Certaine initialisation d'attribut sur la home et country pourrait être simplifié
-  - NotFoundComponent pourrait avoir l'attribut Router dans le constructor
+  - Pas de gestion de chargement suite à une requête
   - Pas de gestion d'erreur en cas de donnée manquante par page
   - Pas de gestion d'erreur en cas de mauvais param countryName ou redirection vers not-found
 
@@ -31,38 +30,47 @@
 
 ### Objectifs
 
-- une logique de récupération des countries dans un service pour la page dashboard/home:
-  - une méthode `getOlympicsKPIs` (totalParticipations, totalCountries) pour initialiser les attributs du `header`
-  - une méthode `getOlympicsChart` pour initialiser les attributs du composant `chart` ({type:"pie", labels:Array<country>, values: Array<SumOfMedalsCount>})
-- une logique de récupération d'un country par id pour la page country:
-  - une méthode `getCountryKPIs` (totalParticipations, totalAthletes et totalMedals) pour les attributs du `header`
-  - une méthode `getCountryChart` pour initialiser les attributs du composant `chart` ({type:"bar", labels:Array<participations.year>, values:Array<participations.medalsCount>})
+- une logique de récupération des données dans un service pour centraliser et corriger l'_Observer Pattern_ `this.http.get<any[]>(this.olympicUrl).pipe().subscribe(...)` présent sur toutes les pages :
+  - une méthode `getOlympics` pour la page home
+  - une méthode `getOlympicbyId` pour la page country
+- une logique de préparation des données dans un service pour les KPIs pour les attributs du `header`:
+  - une méthode `getOlympicsKPIs` (totalParticipations, totalCountries) pour la page home
+  - une méthode `getCountryKPIs` (totalParticipations, totalAthletes et totalMedals) pour la page country
+- une logique de préparation des données dans un service pour générer les charts:
+  - une méthode `getOlympicsChart` pour la page home
+  - une méthode `getCountryChart` pour la page country
 
-````typescript
+```typescript
 type Header = {
-  title: string,
+  title: string;
   kpis: Array<{
-    label:string,
-    value:number
-  }>
-}
+    label: string;
+    value: number;
+  }>;
+};
 
 type Chart = {
-  type: 'pie' | 'bar',
-  labels: Array<string>,
-  values: Array<number | string>,
-}
+  config: ChartConfiguration; // type fourni par chart.js
+};
 ```
+
 ### Avantages
 
-- Éviter la duplication de la requête vers `olympicUrl` : réduction des appels réseau en stockant les résultats dans un `BehaviorSubject` pour éviter les requêtes inutile si les données sont déjà présentes en mémoire.
+- Éviter la duplication de la requête vers `olympicUrl` : réduction des appels réseau en stockant les résultats pour éviter les requêtes inutile si les données sont déjà présentes en mémoire.
 - Permettra de remplacer l'url de l'API facilement dans le service data.service.ts
-- Les composants consomment uniquement les données fournis par le service sans accès à l'API.
-- Avoir un code maintenable avec des services dédiés à chaque logique (chart & header)
-- Avoir des fichicers lisible moins long
-- Éviter la duplication des composants par fonctionnalités
+- Les composants consomment uniquement les données fournis par les services sans accès à l'API.
+- Avoir un code maintenable avec des services dédiés à chaque logique (chart & KPIs)
+- Avoir des fichiers plus lisibles et moins volumineux
+- Éviter la duplication de logique entre composants ayant une fonctionnalité similaire
 
 ### Arborescence
+
+L'arborescence du projet doit suivre le pattern de séparation des responsabilités :
+
+- `components/` : Composants d'UI réutilisables.
+- `services/`: Logiques métier et récupération avec les données.
+- `pages/` : Vues principales liées aux routes de l'application.
+- `assets/` : Fichiers statiques et données de simulation (mock).
 
 ```text
 src/app/
@@ -70,57 +78,53 @@ src/app/
 ├── app.component.scss
 ├── app.component.spec.ts
 ├── app.component.ts
-├── ?? app.routes.ts | app-routing.module.ts
-├── ?? app.config.ts | app.module.ts
+├── app.routes.ts ? app-routing.module.ts
+├── app.config.ts ? app.module.ts
 ├── components/
-│ ├── header
-│ │ ├── header.component.html
-│ │ ├── header.component.scss
-│ │ ├── header.component.spec.ts
-│ │ └── header.component.ts
-│ └── chart
-│ │ ├── chart.component.html
-│ │ ├── chart.component.scss
-│ │ ├── chart.component.spec.ts
-│ │ └── chart.component.ts
+│ ├── header/
+│ ├── card/
+│ ├── chart/
+│ ├── error/
+│ └── loading/
 ├── models/
-│ ├── Olympic.ts
-│ ├── Kpi.ts
-│ ├── Participation.ts
-│ └── Chart.ts
+│ └── olympic.model.ts
 ├── pages/
-│ ├── country
-│ │ ├── country.component.html
-│ │ ├── country.component.scss
-│ │ ├── country.component.spec.ts
-│ │ └── country.component.ts
-│ ├── home
-│ │ ├── home.component.html
-│ │ ├── home.component.scss
-│ │ ├── home.component.spec.ts
-│ │ └── home.component.ts
-│ └── not-found
-│   ├── not-found.component.html
-│   ├── not-found.component.scss
-│   ├── not-found.component.spec.ts
-│   └── not-found.component.ts
+│ ├── country/
+│ ├── home/
+│ └── not-found/
 └── services
-  ├── data.service.ts // Singleton pattern
-  ├── kpis.service.ts // Adapter pattern
-  └── charts.service.ts // Adapter pattern
+  ├── data.service.ts // _Singleton pattern_
+  ├── kpis.service.ts
+  └── charts.service.ts
 ```
+
+### Schema
 
 ```mermaid
 graph TD
-App["Angular App"]
-Header["Header"]
-Chart["Chart"]
-Services["Services"]
+  subgraph Pages
+    Home["Home"]
+    Country["Country"]
+  end
+  subgraph Components
+    Header["Header"]
+    Chart["Chart"]
+  end
+  subgraph Services
+    DataService["Data"]
+    ChartService["Chart"]
+    KpiService["KPIs"]
+  end
+
 Data["Données mockées"]
-App --> Header
-App --> Chart
-Header --> Services
-Chart --> Services
-Services --> Data
+App["App"]
+
+App --> Pages
+Pages --> Components
+Pages --> Services
+
+ChartService --> DataService
+KpiService --> DataService
+
+DataService --> Data
 ```
-````

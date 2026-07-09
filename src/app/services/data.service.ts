@@ -28,7 +28,7 @@ export class DataService {
         map((olympics: Olympic[]) =>
           [...olympics].sort((a, b) => a.country.localeCompare(b.country)),
         ),
-        // Memoization : Observable avec cache : la 1ère souscription déclenche l'appel HTTP, toutes suivantes réutilisent la même requête.
+        // Avoiding duplicate HTTP calls, caches the last emitted value and shares it across subscribers.
         shareReplay(1),
         catchError((error: HttpErrorResponse) => {
           this.olympics$ = null;
@@ -41,7 +41,7 @@ export class DataService {
 
   /**
    * Get an observable that emits an country associated with an id.
-   * @param {number} id - Country's id to find
+   * @param {number} countryId - Country's id to find
    * @returns {Observable<Olympic | undefined>} An observable of an Olympic or undefined.
    */
   getOlympicById(countryId: number): Observable<Olympic | undefined> {

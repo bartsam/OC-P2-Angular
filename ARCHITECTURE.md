@@ -65,8 +65,14 @@ Les composants pages (`HomeComponent`, `CountryComponent`) orchestrent ensuite l
 
 ```mermaid
 graph TD
+  subgraph Pages
+    Home[Home]
+    Country[Country]
+  end
   subgraph Components
-    Pages[Page]
+    Chart[Chart]
+    Header[Header]
+    UI[UI Components]
   end
   subgraph Services
     DataService[DataService]
@@ -79,9 +85,11 @@ graph TD
   end
 
 
-  Pages --> DataService
+  Pages --> Components
+  DataService --> Pages
   Pages --> ChartService
   Pages --> KpisService
+
 
   DataService --> JSON
 ```
@@ -113,7 +121,7 @@ export interface Kpi {
 
 ## Routing
 
-Le routing repose sur provideRouter() associé à des composants standalone, remplaçant l'approche classique app-routing.module.ts avec @NgModule (RouterModule.forRoot), désormais considérée comme legacy.
+Le routing repose sur `provideRouter()` associé à des composants standalone.
 
 | Route           | Composant           | Rôle                                           |
 | --------------- | ------------------- | ---------------------------------------------- |
