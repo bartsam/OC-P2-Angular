@@ -1,16 +1,31 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { ChartComponent } from '@components/chart/chart.component';
+import { EmptyComponent } from '@components/empty/empty.component';
+import { ErrorComponent } from '@components/error/error.component';
+import { HeaderComponent } from '@components/header/header.component';
+import { LoadingComponent } from '@components/loading/loading.component';
+import { Kpi, Olympic } from '@models/olympic.model';
+import { ChartService } from '@services/chart.service';
+import { DataService } from '@services/data.service';
+import { KpisService } from '@services/kpis.service';
 import { ChartConfiguration } from 'chart.js';
 import { catchError, finalize, Observable, of } from 'rxjs';
-import { Kpi, Olympic } from 'src/app/models/olympic.model';
-import { ChartService } from 'src/app/services/chart.service';
-import { DataService } from 'src/app/services/data.service';
-import { KpisService } from 'src/app/services/kpis.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
+  standalone: true,
+  imports: [
+    HeaderComponent,
+    LoadingComponent,
+    ErrorComponent,
+    ChartComponent,
+    EmptyComponent,
+    AsyncPipe,
+  ],
 })
 export class HomeComponent implements OnInit {
   public titlePage = 'Medals per Country';

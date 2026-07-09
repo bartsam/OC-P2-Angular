@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Olympic, Participation } from '@models/olympic.model';
 import { ActiveElement, ChartConfiguration, ChartEvent } from 'chart.js';
-import { Olympic, Participation } from '../models/olympic.model';
 
 @Injectable({
   providedIn: 'root',

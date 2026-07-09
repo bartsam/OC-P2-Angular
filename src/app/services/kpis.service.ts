@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Kpi, Olympic } from '../models/olympic.model';
+import { Kpi, Olympic } from '@models/olympic.model';
 
 @Injectable({
   providedIn: 'root',

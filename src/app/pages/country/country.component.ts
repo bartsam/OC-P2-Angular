@@ -1,16 +1,31 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ChartComponent } from '@components/chart/chart.component';
+import { EmptyComponent } from '@components/empty/empty.component';
+import { ErrorComponent } from '@components/error/error.component';
+import { HeaderComponent } from '@components/header/header.component';
+import { LoadingComponent } from '@components/loading/loading.component';
+import { Kpi, Olympic } from '@models/olympic.model';
+import { ChartService } from '@services/chart.service';
+import { DataService } from '@services/data.service';
+import { KpisService } from '@services/kpis.service';
 import { ChartConfiguration } from 'chart.js';
 import { catchError, filter, finalize, Observable, of, tap } from 'rxjs';
-import { Kpi, Olympic } from 'src/app/models/olympic.model';
-import { ChartService } from 'src/app/services/chart.service';
-import { DataService } from 'src/app/services/data.service';
-import { KpisService } from 'src/app/services/kpis.service';
 
 @Component({
   selector: 'app-country',
   templateUrl: './country.component.html',
   styleUrls: ['./country.component.scss'],
+  standalone: true,
+  imports: [
+    HeaderComponent,
+    LoadingComponent,
+    ErrorComponent,
+    ChartComponent,
+    EmptyComponent,
+    AsyncPipe,
+  ],
 })
 export class CountryComponent implements OnInit {
   public titlePage$!: Observable<string>;

@@ -1,5 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { Olympic } from '@models/olympic.model';
 import {
   Observable,
   catchError,
@@ -8,7 +9,6 @@ import {
   shareReplay,
   throwError,
 } from 'rxjs';
-import { Olympic } from '../models/olympic.model';
 
 @Injectable({ providedIn: 'root' })
 export class DataService {

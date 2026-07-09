@@ -11,9 +11,10 @@ import {
 import { Chart, ChartConfiguration } from 'chart.js/auto';
 
 @Component({
-  selector: 'app-chart',
-  templateUrl: './chart.component.html',
-  styleUrl: './chart.component.scss',
+    selector: 'app-chart',
+    templateUrl: './chart.component.html',
+    styleUrl: './chart.component.scss',
+    standalone: true,
 })
 export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   @Input({ required: true }) config!: ChartConfiguration;
