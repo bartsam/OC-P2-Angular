@@ -16,7 +16,6 @@
 - Absence de typage strict :
   - Créer un répertoire /models pour typer les country et les stats par page
   - Revoir l'initialisation des attributs dans ngOnInit
-  - Il manque les types des lib de test (jasmine)
 - Code à supprimer :
   - console.log(`Liste des données : ${JSON.stringify(data)}`); sur home.component.ts
 - Mauvaise gestion des observables : `subscribe` dépriécié à revoir avec Observer Pattern et rxjs ?

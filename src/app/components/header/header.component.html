@@ -16,7 +16,7 @@
       <h2>{{ title }}</h2>
     }
   </div>
-  <div class="kpis">
+  <div class="kpis" aria-live="polite">
     @for (kpi of kpis; track kpi.value) {
       <app-card [label]="kpi.label" [value]="kpi.value" />
     }

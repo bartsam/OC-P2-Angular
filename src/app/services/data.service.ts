@@ -28,7 +28,7 @@ export class DataService {
         map((olympics: Olympic[]) =>
           [...olympics].sort((a, b) => a.country.localeCompare(b.country)),
         ),
-        // Observable en "multicast" avec cache : la 1ère souscription déclenche l'appel HTTP, toutes suivantes réutilisent la même requête.
+        // Memoization : Observable avec cache : la 1ère souscription déclenche l'appel HTTP, toutes suivantes réutilisent la même requête.
         shareReplay(1),
         catchError((error: HttpErrorResponse) => {
           this.olympics$ = null;

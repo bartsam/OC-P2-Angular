@@ -7,7 +7,7 @@
     <app-error [message]="error" />
   } @else {
     @if (chart$ | async; as chart) {
-      <app-chart [config]="chart" />
+      <app-chart [config]="chart" [label]="titlePage" />
     } @else {
       <app-empty />
     }

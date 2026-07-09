@@ -17,6 +17,7 @@ import { Chart, ChartConfiguration } from 'chart.js/auto';
 })
 export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   @Input({ required: true }) config!: ChartConfiguration;
+  @Input() label?: string | null;
 
   // 1. Accès à l'élément #chartCanvas du template
   @ViewChild('chartCanvas') canvasRef!: ElementRef<HTMLCanvasElement>;
