@@ -41,13 +41,15 @@ export class DataService {
 
   /**
    * Get an observable that emits an country associated with an id.
-   * @param {number} countryId - Country's id to find
+   * @param {string} countryName - Country's name to find
    * @returns {Observable<Olympic | undefined>} An observable of an Olympic or undefined.
    */
-  getOlympicById(countryId: number): Observable<Olympic | undefined> {
+  getOlympicByName(countryName: string): Observable<Olympic | undefined> {
     return this.getOlympics().pipe(
       map((countries: Olympic[]) =>
-        countries.find((c: Olympic) => c.id === countryId),
+        countries.find(
+          (c: Olympic) => c.country.toLowerCase() === countryName.toLowerCase(),
+        ),
       ),
     );
   }

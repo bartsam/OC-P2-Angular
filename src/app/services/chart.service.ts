@@ -9,16 +9,15 @@ export class ChartService {
   /**
    * Get a ChartConfiguration for a chart pie of all countries.
    * @param {Olympic[]} olympics - An array of Olympic objects
-   * @param {(countryId: number) => void} [onCountryClick] - Optional callback invoked with the clicked countryId
+   * @param {(countryName: string) => void} [onCountryClick] - Optional callback invoked with the clicked countryName
    * @returns {ChartConfiguration} A configuration of Chart.js
    */
   getOlympicsChart(
     olympics: Olympic[],
-    onCountryClick?: (countryId: number) => void,
+    onCountryClick?: (countryName: string) => void,
   ): ChartConfiguration | null {
     if (!olympics || olympics.length === 0) return null;
 
-    const ids = olympics.map((c: Olympic) => c.id);
     const labels = olympics.map((c: Olympic) => c.country);
     const data = olympics.map((c: Olympic) =>
       c.participations.reduce(
@@ -47,10 +46,9 @@ export class ChartService {
         ],
       },
       options: {
-        aspectRatio: 2.5,
         onClick: (_event: ChartEvent, activeElements: ActiveElement[]) => {
           if (!activeElements.length || !onCountryClick) return;
-          onCountryClick(ids[activeElements[0].index]);
+          onCountryClick(labels[activeElements[0].index]);
         },
       },
     };
@@ -80,7 +78,6 @@ export class ChartService {
         ],
       },
       options: {
-        aspectRatio: 2.5,
         scales: {
           y: {
             title: {

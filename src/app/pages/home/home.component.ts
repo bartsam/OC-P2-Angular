@@ -40,8 +40,10 @@ export class HomeComponent implements OnInit {
   private chartService = inject(ChartService);
 
   ngOnInit() {
-    const onCountryClick = (countryId: number) =>
-      this.router.navigateByUrl(`country/${countryId}`);
+    const onCountryClick = (countryName: string) =>
+      this.router.navigateByUrl(
+        `country/${encodeURIComponent(countryName.toLowerCase())}`,
+      );
 
     const olympics$ = this.dataService.getOlympics().pipe(
       catchError((error: Error) => {

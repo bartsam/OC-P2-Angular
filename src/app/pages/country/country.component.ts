@@ -50,19 +50,19 @@ export class CountryComponent implements OnInit {
   private chartService = inject(ChartService);
 
   ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    const countryId = Number(id);
+    const name = this.route.snapshot.paramMap.get('countryName');
+    const countryName = name ? decodeURIComponent(name) : null;
 
-    if (!id || isNaN(countryId)) {
+    if (!countryName) {
       this.router.navigate(['/not-found']);
       return;
     }
-    const country$ = this.dataService.getOlympicById(countryId).pipe(
+    const country$ = this.dataService.getOlympicByName(countryName).pipe(
       catchError((error: Error) => {
         this.error = error.message;
         return of(undefined);
       }),
-      // Check the result of getOlympicById and redirect if country is undefined
+      // Check the result of getOlympicByName and redirect if country is undefined
       tap((country: Olympic | undefined) => {
         if (!country) this.router.navigate(['/not-found']);
       }),
