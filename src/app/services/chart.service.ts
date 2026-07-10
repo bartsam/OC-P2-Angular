@@ -79,12 +79,6 @@ export class ChartService {
       },
       options: {
         scales: {
-          y: {
-            title: {
-              display: true,
-              text: 'Medals',
-            },
-          },
           x: {
             title: {
               display: true,

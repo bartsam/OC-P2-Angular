@@ -1,9 +1,5 @@
-<div class="page">
-  <app-header
-    [title]="titlePage$ | async"
-    [kpis]="kpis$ | async"
-    backLink="/"
-  />
+<app-header [title]="titlePage$ | async" [kpis]="kpis$ | async" backLink="/" />
+<div class="container">
   @if (loading) {
     <app-loading />
   } @else if (error) {

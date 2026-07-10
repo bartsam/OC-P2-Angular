@@ -1,0 +1,39 @@
+.container {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+.spinner {
+  stroke: #0b868f;
+  transform-origin: center;
+  animation: spinner_main 2s linear infinite;
+  circle {
+    stroke-linecap: round;
+    animation: spinner_circle 1.5s ease-in-out infinite;
+  }
+}
+
+.label {
+  font-weight: bold;
+}
+
+@keyframes spinner_main {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes spinner_circle {
+  0% {
+    stroke-dasharray: 0 150;
+    stroke-dashoffset: 0;
+  }
+  47.5% {
+    stroke-dasharray: 42 150;
+    stroke-dashoffset: -16;
+  }
+  95%,
+  100% {
+    stroke-dasharray: 42 150;
+    stroke-dashoffset: -59;
+  }
+}

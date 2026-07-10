@@ -46,8 +46,8 @@ export class KpisService {
     );
     return [
       { label: 'Number of entries', value: totalEntries },
-      { label: 'Total medals', value: totalMedals },
-      { label: 'Total athletes', value: totalAthletes },
+      { label: 'Total number of medals', value: totalMedals },
+      { label: 'Total number of athletes', value: totalAthletes },
     ];
   }
 }

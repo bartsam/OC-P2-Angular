@@ -4,10 +4,15 @@
   border-radius: 10px;
   color: gray;
   margin: 0px;
+  height: calc(100% - 20px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .label {
   text-align: center;
-  margin: 0;
+  margin-bottom: 4px;
+  font-weight: normal;
 }
 .value {
   text-align: center;
