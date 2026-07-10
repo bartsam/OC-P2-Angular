@@ -4,10 +4,11 @@
 
 L'arborescence du projet suit le pattern de séparation des responsabilités :
 
-- `components/` : Composants d'UI réutilisables.
-- `services/`: Logiques métier et récupération avec les données.
-- `pages/` : Vues principales liées aux routes de l'application.
 - `assets/` : Fichiers statiques et données de simulation (mock).
+- `components/` : Composants d'UI réutilisables.
+- `models/` : Modèles de données TypeScript.
+- `pages/` : Vues principales liées aux routes de l'application.
+- `services/`: Logiques métier et récupération avec les données.
 
 ```text
 src/
