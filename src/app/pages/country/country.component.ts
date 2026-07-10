@@ -54,7 +54,9 @@ export class CountryComponent implements OnInit {
     const countryName = name ? decodeURIComponent(name) : null;
 
     if (!countryName) {
-      this.router.navigate(['/not-found']);
+      this.router.navigate(['/not-found'], {
+        state: { message: `Missing Country ID.` },
+      });
       return;
     }
     const country$ = this.dataService.getOlympicByName(countryName).pipe(
@@ -64,7 +66,10 @@ export class CountryComponent implements OnInit {
       }),
       // Check the result of getOlympicByName and redirect if country is undefined
       tap((country: Olympic | undefined) => {
-        if (!country) this.router.navigate(['/not-found']);
+        if (!country)
+          this.router.navigate(['/not-found'], {
+            state: { message: `Invalid Country ID.` },
+          });
       }),
       // Stop pipe if country is undefined
       filter((country: Olympic | undefined): country is Olympic => !!country),

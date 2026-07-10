@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { BackButtonComponent } from '@components/back-button/back-button.component';
 import { HeaderComponent } from '@components/header/header.component';
 
@@ -9,4 +10,9 @@ import { HeaderComponent } from '@components/header/header.component';
   standalone: true,
   imports: [HeaderComponent, BackButtonComponent],
 })
-export class NotFoundComponent {}
+export class NotFoundComponent {
+  private router = inject(Router);
+  public message: string =
+    this.router.getCurrentNavigation()?.extras.state?.['message'] ??
+    'No corresponding page found';
+}

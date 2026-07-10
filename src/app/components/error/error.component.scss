@@ -1,3 +1,20 @@
 .message {
   color: red;
 }
+
+.box {
+  width: 100%;
+  border-radius: 10px;
+  background-color: #ffe6e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+}
+
+@media screen and (min-width: 768px) {
+  .box {
+    width: 60%;
+    padding: 120px 0;
+  }
+}
