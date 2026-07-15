@@ -51,8 +51,9 @@ export class HomeComponent implements OnInit {
         return of([]);
       }),
       finalize(() => (this.loading = false)),
-      // Avoid duplicating catchError/finalize for each subscriber
-      shareReplay(1),
+      // Avoid duplicating catchError/finalize for each subscriber,
+      // and unsubscribe from the source once all subscribers are gone (refCount)
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
 
     this.kpis$ = olympics$.pipe(

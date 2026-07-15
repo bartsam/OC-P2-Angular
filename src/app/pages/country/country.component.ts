@@ -76,8 +76,9 @@ export class CountryComponent implements OnInit {
       finalize(() => {
         this.loading = false;
       }),
-      // Avoid duplicating catchError/tap/finalize for each subscriber
-      shareReplay(1),
+      // Avoid duplicating catchError/tap/finalize for each subscriber,
+      // and unsubscribe from the source once all subscribers are gone (refCount)
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
 
     this.titlePage$ = country$.pipe(map((country: Olympic) => country.country));

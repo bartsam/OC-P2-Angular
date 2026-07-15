@@ -61,6 +61,7 @@ export class DataService {
    */
   private handleError(error: HttpErrorResponse) {
     let errorMessage: string;
+    // Network and timeout errors have a status code of 0
     if (error.status === 0) {
       console.error('Network error:', error.error);
       errorMessage = 'Unable to contact server.';
